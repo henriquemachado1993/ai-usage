@@ -41,6 +41,8 @@ export default function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [view, setView] = useState<View>("list");
   const [version, setVersion] = useState("");
+  const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
   const now = useNow(30_000);
 
   useEffect(() => {
@@ -65,21 +67,31 @@ export default function App() {
   }, [dock.collapsed, snapshots.length]);
 
   const updateSettings = (next: SettingsModel) => {
-    setSettings(next);
-    api.setSettings(next).then(setSettings).catch(console.error);
+    setSettingsError(null);
+    api.setSettings(next).then(setSettings).catch((error) => setSettingsError(`Não foi possível salvar: ${String(error)}`));
   };
 
   const collapse = (collapsed: boolean) => {
-    if (collapsed) setView("list");
+    if (collapsed) {
+      setView("list");
+      setSelectedAccount(null);
+    }
     api.setCollapsed(collapsed, stripHeight(snapshots.length)).then(setDock);
   };
 
-  const alpha = { "--alpha": settings?.opacity ?? 0.94 } as React.CSSProperties;
+  const scale = (settings?.uiScale ?? 100) / 100;
+  const alpha = {
+    "--alpha": settings?.opacity ?? 0.94,
+    width: `${100 / scale}%`,
+    height: `${100 / scale}%`,
+    transform: `scale(${scale})`,
+    transformOrigin: "top left",
+  } as React.CSSProperties;
 
   if (dock.collapsed) {
     return (
       <div className="root" style={alpha}>
-        <DockStrip snapshots={snapshots} edge={dock.edge} onExpand={() => collapse(false)} />
+        <DockStrip snapshots={snapshots} edge={dock.edge} onExpand={(accountId) => { setSelectedAccount(accountId ?? null); collapse(false); }} />
       </div>
     );
   }
@@ -113,10 +125,11 @@ export default function App() {
         </div>
 
         <main className="content">
+          {settingsError && <div role="alert" className="detail-message status-error">{settingsError}</div>}
           {view === "list" && (
             <>
               {snapshots.map((s) => (
-                <AccountRow key={s.accountId} snapshot={s} now={now} />
+                <AccountRow key={s.accountId} snapshot={s} now={now} selected={selectedAccount === s.accountId} onToggle={() => setSelectedAccount(selectedAccount === s.accountId ? null : s.accountId)} />
               ))}
               {snapshots.length === 0 && (
                 <div className="empty muted">

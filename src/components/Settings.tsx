@@ -64,6 +64,13 @@ export function Settings({ settings, onChange, onAddAccount, onBack }: Props) {
       </label>
 
       <label className="field">
+        <span>Tamanho do widget</span>
+        <select value={settings.uiScale} onChange={(e) => onChange({ ...settings, uiScale: Number(e.target.value) })}>
+          {[70, 85, 100, 115].map((scale) => <option key={scale} value={scale}>{scale}%{scale === 100 ? " · padrão" : ""}</option>)}
+        </select>
+      </label>
+
+      <label className="field">
         <span>Opacidade</span>
         <input
           type="range"

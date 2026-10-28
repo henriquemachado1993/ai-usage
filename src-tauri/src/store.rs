@@ -18,7 +18,8 @@ impl Store {
     pub fn load(dir: PathBuf) -> Self {
         let _ = fs::create_dir_all(&dir);
         let accounts = read_json(&dir.join("accounts.json")).unwrap_or_default();
-        let settings = read_json(&dir.join("settings.json")).unwrap_or_default();
+        let mut settings: Settings = read_json(&dir.join("settings.json")).unwrap_or_default();
+        settings.ui_scale = Settings::normalize_scale(settings.ui_scale);
         Self {
             dir,
             accounts,

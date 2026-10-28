@@ -142,6 +142,7 @@ pub fn set_settings(
     state: State<'_, AppState>,
     settings: Settings,
 ) -> Result<Settings, String> {
+    let previous_scale = state.store.lock().unwrap().settings.scale();
     let saved = {
         let mut s = state.store.lock().unwrap();
         let interval_changed = s.settings.refresh_minutes != settings.refresh_minutes;
@@ -152,6 +153,7 @@ pub fn set_settings(
             collapsed: s.settings.collapsed,
             expanded_width: s.settings.expanded_width,
             expanded_height: s.settings.expanded_height,
+            ui_scale: Settings::normalize_scale(settings.ui_scale),
             ..settings
         };
         s.save_settings()?;
@@ -160,6 +162,8 @@ pub fn set_settings(
         }
         s.settings.clone()
     };
+
+    crate::dock::apply_scale(&app, previous_scale, saved.scale(), saved.collapsed)?;
 
     if let Some(w) = app.get_webview_window("main") {
         w.set_always_on_top(saved.always_on_top)

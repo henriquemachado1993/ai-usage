@@ -144,6 +144,12 @@ body,
 }
 
 .row-head {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -535,7 +541,7 @@ input[type="checkbox"] {
   flex-direction: column;
   align-items: center;
   height: 100%;
-  padding: 12px 0;
+  padding: 8px 0;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: rgba(var(--bg), var(--alpha));
@@ -543,25 +549,24 @@ input[type="checkbox"] {
 }
 
 .strip-right {
-  border-right: 2px solid var(--accent);
   border-radius: 16px 0 0 16px;
 }
 
 .strip-left {
-  border-left: 2px solid var(--accent);
   border-radius: 0 16px 16px 0;
 }
 
-.strip-logo {
+.strip-handle {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: 17px;
   flex-shrink: 0;
+  color: var(--muted);
 }
 
-.strip .dot {
-  margin: 6px 0 7px;
+.strip-handle svg {
+  pointer-events: none;
 }
 
 .strip-item {
@@ -570,11 +575,14 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  height: 46px;
-  width: 100%;
+  height: 47px;
+  width: 40px;
   flex-shrink: 0;
   cursor: pointer;
   border-radius: 8px;
+  border: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .strip-item:hover {
@@ -596,8 +604,8 @@ input[type="checkbox"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 26px;
   flex-shrink: 0;
   border: 0;
   border-radius: 9px;
@@ -609,6 +617,18 @@ input[type="checkbox"] {
 .strip-toggle:hover {
   background: var(--hover);
   color: var(--accent);
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 .rh {

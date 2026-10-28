@@ -3,6 +3,7 @@
 Registro vivo do projeto. Agentes e pessoas devem consultar antes de mudar algo relevante e acrescentar entradas novas ao final de cada seção (com data).
 
 ## Decisões
+- **2026-10-28** — Exploração de UI isolada em `propostas.html` e `src/proposals/`, acessível com `npm run dev` em `/propostas.html`. O usuário confirmou protótipos interativos e modo compacto com ícone + percentual; detalhes ao abrir. A aprovação posterior da faixa estreita está registrada abaixo; lista e barra continuam propostas com dados demonstrativos, não selecionadas.
 - **2026-10-26** — Stack: Tauri 2 + React 19 + TypeScript + Vite. Motivo: binário pequeno e backend Rust para ler arquivos, Keychain e fazer HTTP sem CORS.
 - **2026-10-26** — Toda coleta de dados acontece no backend (`src-tauri/src/poller.rs`); o frontend só escuta o evento `usage-updated` e chama commands.
 - **2026-10-26** — Codex: não renovamos o token (o refresh rotaciona e desloga o CLI); expirado vira `expired`/fallback local.
@@ -16,6 +17,7 @@ Registro vivo do projeto. Agentes e pessoas devem consultar antes de mudar algo 
 - **2026-10-26** — `src/dev/mockTauri.ts` simula o IPC quando a UI roda no navegador (`npm run dev`, `?edge=left|right&collapsed`); só carrega em DEV e não entra no build.
 - **2026-10-26** — Copilot Business com `token_based_billing`: todas as cotas vêm `unlimited: true` e o consumo aparece em `credits_used`. Exibimos "Ilimitado · N usados".
 - **2026-10-26** — O refresh token do Claude tem validade própria (`refreshTokenExpiresAt`); depois dela é preciso `claude` → `/login` no terminal.
+- **2026-10-28** — O usuário aprovou a faixa vertical compacta estreita e as escalas de 70%, 85%, 100% e 115%. Implementado `settings.uiScale` persistido no backend, com padrão 100% para configurações antigas e valores inválidos. O seletor “Tamanho do widget” aplica a escala à UI e à janela nativa, tanto recolhida quanto expandida. As dimensões de referência são unidades lógicas a 100%, independentes do fator de DPI do sistema: largura da faixa = 44; altura = 65 + 47 por conta, antes de limitar à área de trabalho. `expandedWidth/expandedHeight` ficam armazenados sem a escala da UI; ao recolher, divide-se o tamanho lógico atual pela escala, evitando acumular multiplicações ao reabrir ou trocar de tamanho. Essa decisão substitui a faixa de 60px registrada em 2026-10-26. O sistema visual escuro com verde e cores semânticas foi preservado; lista e barra não foram selecionadas. Registro de implementação, sem afirmar validação visual da janela nativa.
 
 ## Endpoints (não oficiais)
 - Claude: `GET https://api.anthropic.com/api/oauth/usage` com `anthropic-beta: oauth-2025-04-20`. Campos `five_hour`, `seven_day`, `seven_day_opus`, `seven_day_sonnet` (`utilization` 0–100, `resets_at` RFC 3339) e `extra_usage`.
@@ -40,6 +42,7 @@ Registro vivo do projeto. Agentes e pessoas devem consultar antes de mudar algo 
 - Instalador de macOS só pode ser gerado em um Mac (ou no CI `.github/workflows/build.yml`); não há cross-compile a partir do Windows. Sem assinatura/notarização, o Gatekeeper bloqueia na primeira abertura.
 
 ## Como validar
+- **2026-10-28** — As propostas em `/propostas.html` incluem escala de 70%, 85%, 100% e 115%, compartilhada entre as três opções e salva no localStorage (`ai-usage:proposals:scale`). Essa preferência de protótipo é independente de `settings.uiScale`, que controla o widget implementado. Para validar nativamente, conferir troca de escala expandido/recolhido, abertura dos detalhes pela conta, encaixe nas duas bordas e reinício com a preferência salva; o mock do navegador não comprova geometria, DPI ou comportamento de janela Tauri.
 - `cd src-tauri && cargo test` — testes de parsing dos três provedores.
 - `cd src-tauri && cargo test probe_default_accounts -- --ignored --nocapture` — consulta as APIs reais com as contas locais e imprime status/janelas (sem tokens).
 - `npm run tauri dev` — conferir números contra `/usage` (Claude Code), `/status` (Codex) e a página do Copilot no GitHub.

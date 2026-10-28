@@ -93,6 +93,7 @@ pub struct Settings {
     pub collapsed: bool,
     pub expanded_width: f64,
     pub expanded_height: f64,
+    pub ui_scale: u16,
 }
 
 impl Default for Settings {
@@ -106,6 +107,44 @@ impl Default for Settings {
             collapsed: false,
             expanded_width: 340.0,
             expanded_height: 420.0,
+            ui_scale: 100,
+        }
+    }
+}
+
+impl Settings {
+    pub fn scale(&self) -> f64 {
+        Self::normalize_scale(self.ui_scale) as f64 / 100.0
+    }
+
+    pub fn normalize_scale(value: u16) -> u16 {
+        match value {
+            70 | 85 | 100 | 115 => value,
+            _ => 100,
+        }
+    }
+}
+
+#[cfg(test)]
+mod settings_tests {
+    use super::Settings;
+
+    #[test]
+    fn old_settings_preserve_preferences_and_default_to_full_scale() {
+        let settings: Settings = serde_json::from_str(r#"{"opacity":0.8,"collapsed":true,"expandedWidth":380}"#).unwrap();
+        assert_eq!(settings.ui_scale, 100);
+        assert_eq!(settings.opacity, 0.8);
+        assert!(settings.collapsed);
+        assert_eq!(settings.expanded_width, 380.0);
+    }
+
+    #[test]
+    fn invalid_scale_falls_back_to_full_size() {
+        for value in [0, 1, 69, 101, u16::MAX] {
+            assert_eq!(Settings::normalize_scale(value), 100);
+        }
+        for value in [70, 85, 100, 115] {
+            assert_eq!(Settings::normalize_scale(value), value);
         }
     }
 }

@@ -36,8 +36,18 @@ const snapshots = [
   },
 ];
 
-let settings = { refreshMinutes: 5, opacity: 0.94, alwaysOnTop: true, autostart: false, dismissed: [], collapsed: false, expandedWidth: 340, expandedHeight: 420 };
+const scaleKey = "ai-usage:mock:scale";
+let savedScale = 100;
+try { savedScale = Number(localStorage.getItem(scaleKey)) || 100; } catch { /* O mock funciona sem armazenamento local. */ }
+let settings = { refreshMinutes: 5, opacity: 0.94, alwaysOnTop: true, autostart: false, dismissed: [], collapsed: false, expandedWidth: 340, expandedHeight: 420, uiScale: [70, 85, 100, 115].includes(savedScale) ? savedScale : 100 };
 let dock = { edge: new URLSearchParams(location.search).get("edge") ?? "right", collapsed: location.search.includes("collapsed") };
+let stripHeight = 65 + 47 * snapshots.length;
+const resizePreview = () => {
+  const scale = settings.uiScale / 100;
+  document.body.style.width = `${(dock.collapsed ? 44 : settings.expandedWidth) * scale}px`;
+  document.body.style.height = `${(dock.collapsed ? stripHeight : settings.expandedHeight) * scale}px`;
+};
+resizePreview();
 
 mockWindows("main");
 mockIPC(
@@ -50,11 +60,15 @@ mockIPC(
         return settings;
       case "set_settings":
         settings = a.settings as typeof settings;
+        try { localStorage.setItem(scaleKey, String(settings.uiScale)); } catch { /* O mock funciona sem armazenamento local. */ }
+        resizePreview();
         return settings;
       case "get_dock":
         return dock;
       case "set_collapsed":
         dock = { ...dock, collapsed: a.collapsed as boolean };
+        stripHeight = (a.stripHeight as number) || stripHeight;
+        resizePreview();
         return dock;
       case "list_accounts":
         return snapshots.map((s) => ({ id: s.accountId, provider: s.provider, source: s.source, label: s.label, configDir: null, hasToken: false }));

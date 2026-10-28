@@ -42,6 +42,7 @@ export interface Settings {
   collapsed: boolean;
   expandedWidth: number;
   expandedHeight: number;
+  uiScale: number;
 }
 
 export interface NewAccount {

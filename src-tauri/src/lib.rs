@@ -7,7 +7,7 @@ mod state;
 mod store;
 mod tray;
 
-use tauri::{LogicalSize, Manager, WindowEvent};
+use tauri::{Manager, WindowEvent};
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_window_state::StateFlags;
 
@@ -33,19 +33,14 @@ pub fn run() {
 
             let store = store::Store::load(app.path().app_config_dir()?);
             let always_on_top = store.settings.always_on_top;
-            let collapsed = store.settings.collapsed;
             app.manage(state::AppState::new(store));
             app.manage(dock::Dock::default());
 
             if let Some(window) = app.get_webview_window("main") {
                 window.set_always_on_top(always_on_top)?;
-                if collapsed {
-                    window.set_resizable(false)?;
-                } else {
-                    window.set_min_size(Some(LogicalSize::new(260.0, 120.0)))?;
-                }
             }
             dock::snap(app.handle());
+            dock::initialize(app.handle()).map_err(std::io::Error::other)?;
             tray::create(app.handle())?;
             poller::spawn(app.handle().clone());
             Ok(())
